@@ -1,0 +1,32 @@
+# Copyright (c) 2022 Sebastian Pipping <sebastian@pipping.org>
+# Licensed under the GPL v3 or later
+
+name: Build on Linux
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: '0 2 * * 5'  # Every Friday at 2am
+
+jobs:
+  clang-format:
+    name: Build on Linux
+    runs-on: ubuntu-22.04
+    steps:
+
+    - uses: actions/checkout@v2.4.0
+
+    - name: Install build dependencies
+      run: |-
+        set -x
+        sudo apt-get update
+        sudo apt-get install --yes --no-install-recommends -V \
+            build-essential \
+            libsdl1.2-dev \
+            libsdl-gfx1.2-dev \
+            libsdl2-dev
+
+    - name: Build
+      run: |-
+        make -j$(nproc)
