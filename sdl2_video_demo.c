@@ -102,6 +102,9 @@ int main() {
 
   const Uint64 initial = SDL_GetPerformanceCounter();
 
+  int window_width = initial_window_width;
+  int window_height = initial_window_height;
+
   while (running) {
     while (SDL_PollEvent(&event) != 0) {
       switch (event.type) {
@@ -129,6 +132,14 @@ int main() {
             break;
           }
         } break;
+        }
+        break;
+      case SDL_WINDOWEVENT:
+        switch (event.window.event) {
+        case SDL_WINDOWEVENT_SIZE_CHANGED:
+          window_width = event.window.data1;
+          window_height = event.window.data2;
+          break;
         }
         break;
       case SDL_QUIT:
@@ -174,7 +185,8 @@ int main() {
     seconds_since_last_fps_dump += seconds_elapsed;
     const int frames_per_second = (int)(1.0 / seconds_elapsed);
     if (seconds_since_last_fps_dump > 1) {
-      fprintf(stderr, "SDL2 FPS: %d, took %d milliseconds\n", frames_per_second,
+      fprintf(stderr, "[SDL 2] %3d FPS at %dx%dx%d (took %2dms)\n",
+              frames_per_second, window_width, window_height, bits_per_pixel,
               (int)(seconds_elapsed * 1000));
       seconds_since_last_fps_dump = 0.0f;
     }

@@ -189,7 +189,8 @@ int main() {
     seconds_since_last_fps_dump += seconds_elapsed;
     const int frames_per_second = (int)(1.0 / seconds_elapsed);
     if (seconds_since_last_fps_dump > 1) {
-      fprintf(stderr, "SDL1 FPS: %d, took %d milliseconds\n", frames_per_second,
+      fprintf(stderr, "[SDL 1] %3d FPS at %dx%dx%d (took %2dms)\n",
+              frames_per_second, window->w, window->h, bits_per_pixel,
               (int)(seconds_elapsed * 1000));
       seconds_since_last_fps_dump = 0.0f;
     }
