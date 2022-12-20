@@ -12,6 +12,9 @@ and to be able to compare their performance.
 
 The code is Software Libre licensed under GPL v3 or later.
 
+Here's a quick 256 color recording of what to expect at runtime:
+![Recording of sdl2_video_demo](recording.gif)
+
 
 # Requirements
 
