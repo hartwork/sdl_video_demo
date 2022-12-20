@@ -1,3 +1,7 @@
+[![Build on Linux](https://github.com/hartwork/sdl_video_demo/actions/workflows/linux.yml/badge.svg)](https://github.com/hartwork/sdl_video_demo/actions/workflows/linux.yml)
+[![Enforce clang-format](https://github.com/hartwork/sdl_video_demo/actions/workflows/clang-format.yml/badge.svg)](https://github.com/hartwork/sdl_video_demo/actions/workflows/clang-format.yml)
+
+
 # SDL video demo (for both SDL 2 and SDL 1)
 
 This repository demos fast blitting of a video buffer
