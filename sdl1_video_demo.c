@@ -8,6 +8,26 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_rotozoom.h> // of sdl-gfx
 
+struct FrameCounter {
+  Uint32 start;
+  Uint32 frequency;
+  int frames;
+};
+
+int count_frame(struct FrameCounter *counter) {
+  const Uint32 now = SDL_GetTicks();
+  const double seconds_passed = (now - counter->start) / counter->frequency;
+  if (seconds_passed >= 1.0) {
+    const int frames_per_second = counter->frames / seconds_passed;
+    counter->frames = 0;
+    counter->start = now;
+    return frames_per_second;
+  } else {
+    counter->frames++;
+    return -1;
+  }
+}
+
 void render_with_scaling_respecting_aspect_ratio(SDL_Surface *window,
                                                  SDL_Surface *texture) {
   const float texture_aspect_ratio = texture->w / (float)texture->h;
@@ -98,12 +118,12 @@ int main() {
   bool running = true;
 
   const Uint32 frequency = 1000; // i.e. milliseconds
+  const Uint32 initial = SDL_GetTicks();
+  struct FrameCounter counter = {
+      .start = initial, .frequency = frequency, .frames = 0};
 
-  float seconds_since_last_fps_dump = 1.0f;
   int grid_index = 0;
   int grid_width = 40;
-
-  const Uint32 initial = SDL_GetTicks();
 
   while (running) {
     while (SDL_PollEvent(&event) != 0) {
@@ -141,8 +161,6 @@ int main() {
         break;
       }
     }
-
-    const Uint32 before = SDL_GetTicks();
 
     if (SDL_LockSurface(texture) == -1) {
       continue; // e.g. while going fullscreen
@@ -184,17 +202,13 @@ int main() {
     }
     SDL_Delay(1); // to avoid 100% CPU usage
 
-    const Uint32 after = SDL_GetTicks();
-    const double seconds_elapsed = (after - before) / (double)frequency;
-    seconds_since_last_fps_dump += seconds_elapsed;
-    const int frames_per_second = (int)(1.0 / seconds_elapsed);
-    if (seconds_since_last_fps_dump > 1) {
-      fprintf(stderr, "[SDL 1] %3d FPS at %dx%dx%d (took %2dms)\n",
-              frames_per_second, window->w, window->h, bits_per_pixel,
-              (int)(seconds_elapsed * 1000));
-      seconds_since_last_fps_dump = 0.0f;
+    const int frames_per_second = count_frame(&counter);
+    if (frames_per_second != -1) {
+      fprintf(stderr, "[SDL1] %3d FPS at %dx%dx%d\n", frames_per_second,
+              window->w, window->h, bits_per_pixel);
     }
 
+    const Uint32 after = SDL_GetTicks();
     const double total_runtime_seconds = (after - initial) / (double)frequency;
     grid_index = (int)(total_runtime_seconds * grid_speed) % grid_width;
   }
