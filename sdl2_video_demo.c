@@ -7,6 +7,26 @@
 
 #include <SDL2/SDL.h>
 
+struct FrameCounter {
+  Uint64 start;
+  Uint64 frequency;
+  int frames;
+};
+
+int count_frame(struct FrameCounter *counter) {
+  const Uint64 now = SDL_GetPerformanceCounter();
+  const double seconds_passed = (now - counter->start) / counter->frequency;
+  if (seconds_passed >= 1.0) {
+    const int frames_per_second = counter->frames / seconds_passed;
+    counter->frames = 0;
+    counter->start = now;
+    return frames_per_second;
+  } else {
+    counter->frames++;
+    return -1;
+  }
+}
+
 void render_with_scaling_respecting_aspect_ratio(SDL_Renderer *renderer,
                                                  SDL_Texture *texture) {
   SDL_Rect texture_rect;
@@ -95,12 +115,12 @@ int main() {
   bool running = true;
 
   const Uint64 frequency = SDL_GetPerformanceFrequency();
+  const Uint64 initial = SDL_GetPerformanceCounter();
+  struct FrameCounter counter = {
+      .start = initial, .frequency = frequency, .frames = 0};
 
-  float seconds_since_last_fps_dump = 1.0f;
   int grid_index = 0;
   int grid_width = 40;
-
-  const Uint64 initial = SDL_GetPerformanceCounter();
 
   int window_width = initial_window_width;
   int window_height = initial_window_height;
@@ -148,8 +168,6 @@ int main() {
       }
     }
 
-    const Uint64 before = SDL_GetPerformanceCounter();
-
     uint8_t *pixels = NULL;
     int pitch = 0; // bytes per row including padding
 
@@ -180,17 +198,13 @@ int main() {
     SDL_RenderPresent(renderer);
     SDL_Delay(1); // to avoid 100% CPU usage
 
-    const Uint64 after = SDL_GetPerformanceCounter();
-    const double seconds_elapsed = (after - before) / (double)frequency;
-    seconds_since_last_fps_dump += seconds_elapsed;
-    const int frames_per_second = (int)(1.0 / seconds_elapsed);
-    if (seconds_since_last_fps_dump > 1) {
-      fprintf(stderr, "[SDL 2] %3d FPS at %dx%dx%d (took %2dms)\n",
-              frames_per_second, window_width, window_height, bits_per_pixel,
-              (int)(seconds_elapsed * 1000));
-      seconds_since_last_fps_dump = 0.0f;
+    const int frames_per_second = count_frame(&counter);
+    if (frames_per_second != -1) {
+      fprintf(stderr, "[SDL2] %3d FPS at %dx%dx%d\n", frames_per_second,
+              window_width, window_height, bits_per_pixel);
     }
 
+    const Uint64 after = SDL_GetPerformanceCounter();
     const double total_runtime_seconds = (after - initial) / (double)frequency;
     grid_index = (int)(total_runtime_seconds * grid_speed) % grid_width;
   }
