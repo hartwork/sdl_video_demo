@@ -149,6 +149,8 @@ int main() {
             break;
           }
         } break;
+        default: // for -Wswitch
+          break;
         }
         break;
       case SDL_VIDEORESIZE:
