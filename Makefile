@@ -1,7 +1,7 @@
 # Copyright (c) 2022 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under GPL v3 or later
 
-CFLAGS += -Wall -Wextra -std=c99 -pedantic -Wno-switch
+CFLAGS += -Wall -Wextra -std=c99 -pedantic
 
 SDL1_CFLAGS := $(shell pkg-config SDL_gfx --cflags)
 SDL1_LDFLAGS := $(shell pkg-config SDL_gfx --libs)
