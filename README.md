@@ -23,7 +23,7 @@ Here's a quick 256 color recording of what to expect at runtime:
 # Requirements
 
 - SDL 2.x
-- SDL 1.x
+- SDL 1.x (or sdl12-compat)
 - sdl-gfx for SDL 1.x (not sdl2-gfx)
 
 e.g.:
