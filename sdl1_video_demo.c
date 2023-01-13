@@ -154,7 +154,6 @@ int main() {
         }
         break;
       case SDL_VIDEORESIZE:
-        SDL_FreeSurface(window);
         window = SDL_SetVideoMode(event.resize.w, event.resize.h,
                                   bits_per_pixel, window_flags);
         break;
@@ -216,7 +215,6 @@ int main() {
   }
 
   SDL_FreeSurface(texture);
-  SDL_FreeSurface(window);
   SDL_Quit();
 
   return EXIT_SUCCESS;
