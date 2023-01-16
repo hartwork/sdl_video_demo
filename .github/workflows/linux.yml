@@ -30,3 +30,9 @@ jobs:
     - name: Build
       run: |-
         make CFLAGS='-O2 -pipe' -j
+
+    - name: Install
+      run: |-
+        set -x -o pipefail
+        make install DESTDIR="${PWD}"/ROOT
+        find ROOT/ | xargs ls -ld
