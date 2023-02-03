@@ -153,10 +153,20 @@ int main() {
           break;
         }
         break;
-      case SDL_VIDEORESIZE:
+      case SDL_VIDEORESIZE: {
+        // Replace by a more recent event, the most recent (if any)
+        SDL_Event resize_events[32];
+        const int events_count = SDL_PeepEvents(
+            resize_events, sizeof(resize_events) / sizeof(resize_events[0]),
+            SDL_GETEVENT, SDL_VIDEORESIZEMASK);
+        if (events_count > 0) {
+          event = resize_events[events_count - 1];
+        }
+
         window = SDL_SetVideoMode(event.resize.w, event.resize.h,
                                   bits_per_pixel, window_flags);
         break;
+      }
       case SDL_QUIT:
         running = false;
         break;
