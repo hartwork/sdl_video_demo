@@ -28,6 +28,36 @@ int count_frame(struct FrameCounter *counter) {
   }
 }
 
+struct ResizeRequest {
+  int width;
+  int height;
+  Uint32 clock_frequency;
+  Uint32 received_at;
+  Uint32 applied_at;
+};
+
+void resize_request_store(struct ResizeRequest *resize_request, int width,
+                          int height) {
+  resize_request->width = width;
+  resize_request->height = height;
+  resize_request->received_at = SDL_GetTicks();
+}
+
+bool resize_request_due(const struct ResizeRequest *resize_request) {
+  if (resize_request->applied_at >= resize_request->received_at) {
+    return false;
+  }
+  const Uint32 now = SDL_GetTicks();
+  const double seconds_passed = (now - resize_request->received_at) /
+                                (double)resize_request->clock_frequency;
+
+  return seconds_passed >= 0.2; // >=300ms is known to feel slow to humans
+}
+
+bool resize_request_done(struct ResizeRequest *resize_request) {
+  resize_request->applied_at = SDL_GetTicks();
+}
+
 void render_with_scaling_respecting_aspect_ratio(SDL_Surface *window,
                                                  SDL_Surface *texture) {
   const float texture_aspect_ratio = texture->w / (float)texture->h;
@@ -121,6 +151,7 @@ int main() {
   const Uint32 initial = SDL_GetTicks();
   struct FrameCounter counter = {
       .start = initial, .frequency = frequency, .frames = 0};
+  struct ResizeRequest resize_request = {.clock_frequency = frequency};
 
   int grid_index = 0;
   int grid_width = 40;
@@ -154,13 +185,18 @@ int main() {
         }
         break;
       case SDL_VIDEORESIZE:
-        window = SDL_SetVideoMode(event.resize.w, event.resize.h,
-                                  bits_per_pixel, window_flags);
+        resize_request_store(&resize_request, event.resize.w, event.resize.h);
         break;
       case SDL_QUIT:
         running = false;
         break;
       }
+    }
+
+    if (resize_request_due(&resize_request)) {
+      window = SDL_SetVideoMode(resize_request.width, resize_request.height,
+                                bits_per_pixel, window_flags);
+      resize_request_done(&resize_request);
     }
 
     if (SDL_LockSurface(texture) == -1) {
