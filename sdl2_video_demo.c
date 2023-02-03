@@ -15,7 +15,8 @@ struct FrameCounter {
 
 int count_frame(struct FrameCounter *counter) {
   const Uint64 now = SDL_GetPerformanceCounter();
-  const double seconds_passed = (now - counter->start) / counter->frequency;
+  const double seconds_passed =
+      (now - counter->start) / (double)counter->frequency;
   if (seconds_passed >= 1.0) {
     const int frames_per_second = counter->frames / seconds_passed;
     counter->frames = 0;
