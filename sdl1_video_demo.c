@@ -55,7 +55,7 @@ bool resize_request_due(const struct ResizeRequest *resize_request) {
   return seconds_passed >= 0.2; // >=300ms is known to feel slow to humans
 }
 
-bool resize_request_done(struct ResizeRequest *resize_request) {
+void resize_request_done(struct ResizeRequest *resize_request) {
   resize_request->applied_at = SDL_GetTicks();
 }
 
